@@ -56,6 +56,9 @@ from mask_former.evaluation import (
 from mask_former.utils.events import WandbWriter, setup_wandb
 from mask_former.utils.post_process_utils import dense_crf_post_process
 
+import mess.datasets
+from mess.evaluation.sem_seg_evaluation import MESSSemSegEvaluator
+
 
 class Trainer(DefaultTrainer):
     """
@@ -83,7 +86,8 @@ class Trainer(DefaultTrainer):
                     reject_threshold=cfg.PSEUDO_REJECT_THRESHOLD,
                 )
             else:
-                evaluator = GeneralizedSemSegEvaluator
+                # evaluator = GeneralizedSemSegEvaluator
+                evaluator = MESSSemSegEvaluator
             evaluator_list.append(
                 evaluator(
                     dataset_name,

@@ -1,6 +1,6 @@
 #!/bin/bash
 source ~/miniconda3/etc/profile.d/conda.sh
-conda activate <env_name>
+conda activate zsseg
 
 # Benchmark
 export DETECTRON2_DATASETS="datasets"
@@ -9,11 +9,11 @@ TEST_DATASETS="bdd100k_sem_seg_val dark_zurich_sem_seg_val mhp_v1_sem_seg_test f
 # Run experiments
 for DATASET in $TEST_DATASETS
 do
- python train_net.py --num-gpus 1 --eval-only --config-file configs/<config_file>.yaml DATASETS.TEST \(\"$DATASET\",\) MODEL.WEIGHTS weights/<model_weights>.pth OUTPUT_DIR output/<model_name>/$DATASET
+ python train_net.py --num-gpus 1 --eval-only --config-file configs/ade20k-150/cross_dataset_test_only.yaml MODEL.WEIGHTS weights/model_final.pth OUTPUT_DIR output/ZSSeg/$DATASET DATASETS.TEST \(\"$DATASET\",\) MODEL.CLIP_ADAPTER.MASK_THR 0.5
 done
 
 # Combine results
-python mess/evaluation/mess_evaluation.py --model_outputs output/<model_name> output/<model2_name> <...>
+python mess/evaluation/mess_evaluation.py --model_outputs output/ZSSeg
 
 # Run evaluation with:
 # nohup bash mess/eval.sh > eval.log &

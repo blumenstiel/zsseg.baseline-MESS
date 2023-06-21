@@ -1,26 +1,27 @@
-# Multi-domain Evaluation of Semantic Segmentation (MESS) with SAN
+# Multi-domain Evaluation of Semantic Segmentation (MESS) with ZSSeg
 
-[[Website](https://github.io)] [[arXiv](https://arxiv.org/)] [[GitHub](https://github.com/blumenstiel/MESS)]
+[[Website (soon)](https://github.io)] [[arXiv (soon)](https://arxiv.org/)] [[GitHub](https://github.com/blumenstiel/MESS)]
 
-This directory contains the code for the MESS evaluation of SAN. Please see the commits for our changes of the model.
+This directory contains the code for the MESS evaluation of ZSSeg. Please see the commits for our changes of the model.
 
 ## Setup
-Create a conda environment `san` and install the required packages. See [mess/README.md]([mess/README.md]) for details.
+Create a conda environment `zsseg` and install the required packages. See [mess/README.md]([mess/README.md]) for details.
 ```sh
  bash mess/setup_env.sh
 ```
 
-Prepare the datasets by following the instructions in [mess/DATASETS.md](mess/DATASETS.md). The `san` env can be used for the dataset preparation. If you evaluate multiple models with MESS, you can change the `dataset_dir` argument and the `DETECTRON2_DATASETS` environment variable to a common directory (see [mess/DATASETS.md](mess/DATASETS.md) and [mess/eval.sh](mess/eval.sh)). 
+Prepare the datasets by following the instructions in [mess/DATASETS.md](mess/DATASETS.md). The `zsseg` env can be used for the dataset preparation. If you evaluate multiple models with MESS, you can change the `dataset_dir` argument and the `DETECTRON2_DATASETS` environment variable to a common directory (see [mess/DATASETS.md](mess/DATASETS.md) and [mess/eval.sh](mess/eval.sh), e.g., `../mess_datasets`). 
 
-Download the SAN weights with
+Download the ZSSeg weights (see https://github.com/MendelXu/zsseg.baseline)
 ```sh
 mkdir weights
-wget https://huggingface.co/Mendel192/san/resolve/main/san_vit_b_16.pth -O weights/san_vit_b_16.pth
-wget https://huggingface.co/Mendel192/san/resolve/main/san_vit_large_14.pth -O weights/san_vit_large_14.pth
+conda activate zsseg
+# Python code for downloading the weights from GDrive. Link: https://drive.google.com/file/d/1pb6UeXoMPy5xdEBtFcQYLOBKZt0xufKY/view
+python -c "import gdown; gdown.download(f'https://drive.google.com/uc?export=download&confirm=pbef&id=1pb6UeXoMPy5xdEBtFcQYLOBKZt0xufKY', output='weights/model_final.pth')"
 ```
 
 ## Evaluation
-To evaluate the SAN models on the MESS dataset, run
+To evaluate the ZSSeg model on the MESS datasets, run
 ```sh
 bash mess/eval.sh
 
@@ -28,20 +29,18 @@ bash mess/eval.sh
 nohup bash mess/eval.sh > eval.log &
 tail -f eval.log 
 ```
+Note that the mask threshold was changed from 0.5 to 0.4 in commit [`aa327d4`](https://github.com/MendelXu/zsseg.baseline/commit/aa327d4e324afd851459bb1bffe6bbdce38dc9f9). We used the original threshold of 0.5 in the evaluation.
 
 For evaluating a single dataset, select the DATASET from [mess/DATASETS.md](mess/DATASETS.md), the DETECTRON2_DATASETS path, and run
 ```
-conda activate san
+conda activate zsseg
 export DETECTRON2_DATASETS="datasets"
 DATASET=<dataset_name>
 
-# Base model
-python train_net.py --eval-only --num-gpus 1 --config-file configs/san_clip_vit_res4_coco.yaml OUTPUT_DIR output/SAN_base/$DATASET MODEL.WEIGHTS weights/san_vit_b_16.pth DATASETS.TEST \(\"$DATASET\",\)
-# Large model
-python train_net.py --eval-only --num-gpus 1 --config-file configs/san_clip_vit_large_res4_coco.yaml OUTPUT_DIR output/SAN_large/$DATASET MODEL.WEIGHTS weights/san_vit_large_14.pth DATASETS.TEST \(\"$DATASET\",\)
+python train_net.py --num-gpus 1 --eval-only --config-file configs/ade20k-150/cross_dataset_test_only.yaml MODEL.WEIGHTS weights/model_final.pth OUTPUT_DIR output/ZSSeg/$DATASET DATASETS.TEST \(\"$DATASET\",\) MODEL.CLIP_ADAPTER.MASK_THR 0.5
 ```
 
-# --- Original SAN README.md ---
+# --- Original ZSSeg README.md ---
 
 # [ECCV2022] A Simple Baseline for Open Vocabulary Semantic Segmentation with Pre-trained Vision-language Model
 
